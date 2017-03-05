@@ -1,9 +1,7 @@
-sudo: false
+sudo: true
 language: python
 python:
   - 3.4
-  - 3.5
-  - 3.6
 
 matrix:
   include:
@@ -22,14 +20,20 @@ cache:
 addons:
   apt:
     packages:
-      - clang-3.4
+      - libclang-3.8-dev
+      - clang-3.8
     sources:
-      - llvm-toolchain-precise
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.8
 
 before_install:
   - if [[ $TRAVIS_OS_NAME == osx ]]; then TRAVIS_PYTHON_VERSION=3.5; fi
   - export TRAVIS_PYTHON_VERSION_MAJOR=${TRAVIS_PYTHON_VERSION%.[0-9]}
   - export TRAVIS_PYTHON_VERSION_MINOR=${TRAVIS_PYTHON_VERSION#[0-9].}
+  - sudo updatedb
+  - locate -br '^libclang.so$'
+  - locate -br '^libclang.so.1$'
+  - sudo ln -s /usr/lib/llvm-3.8/lib/libclang.so /usr/lib/libclang.so
 
   - >
     if [[ $TRAVIS_OS_NAME == osx ]]; then
@@ -37,7 +41,6 @@ before_install:
       sudo ln -sf $(which python3) $(which python)
       sudo ln -sf $(which pip3) $(which pip 2>/dev/null || echo /usr/bin/pip)
     fi
-
   # always use latest versions of pip and setuptools
   - pip install pip setuptools -U
 
